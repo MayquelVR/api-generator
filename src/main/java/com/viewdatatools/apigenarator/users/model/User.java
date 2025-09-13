@@ -17,7 +17,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, unique = true, length = 50)
     private String username;
 
     @Column(nullable = false, unique = true, length = 100)
@@ -26,9 +26,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "created_at", updatable = false, insertable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "created_at", updatable = false, nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "updated_at", insertable = false)
-    private LocalDateTime updatedAt;
+    @Column(name = "updated_at",nullable = false)
+    private LocalDateTime updatedAt = LocalDateTime.now();;
 }
