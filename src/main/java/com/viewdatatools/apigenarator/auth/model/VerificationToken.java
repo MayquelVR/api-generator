@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "verification_token")
@@ -29,9 +28,9 @@ public class VerificationToken {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false, unique = true)
-    private UUID token;
+    @Column(name = "token_hash", nullable = false, unique = true, length = 64)
+    private String tokenHash;
 
-    @Column(name = "expiry_date", nullable = false)
-    private LocalDateTime expiryDate = LocalDateTime.now().plusHours(24);
+    @Column(name = "expiry_at", nullable = false)
+    private LocalDateTime expiresAt = LocalDateTime.now().plusHours(24);
 }

@@ -1,12 +1,10 @@
 package com.viewdatatools.apigenarator.auth.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-
-import java.util.UUID;
 
 @Data
 public class VerifyReq {
-    @NotNull(message = "Password is required")
-    private UUID token;
+    @NotBlank(message = "Password is required")
+    private String token;
 }

@@ -7,11 +7,12 @@ import com.viewdatatools.apigenarator.auth.dto.LoginResp;
 import com.viewdatatools.apigenarator.auth.exception.*;
 import com.viewdatatools.apigenarator.auth.model.User;
 import com.viewdatatools.apigenarator.auth.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
+
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,25 +22,33 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private final MailService mailService;
+    private final TokenService tokenService;
     private final PasswordResetTokenService passwordResetTokenService;
     private final VerificationTokenService verificationTokenService;
+
+    @Value("${app.base-url:http://localhost:4200/activate-account}")
+    private String activateAccountBaseUrl;
+
+    @Value("${app.base-url:http://localhost:4200/reset-password}")
+    private String resetPasswordBaseUrl;
 
     public void register(RegisterReq request) {
         validateUserNotExists(request.getUsername(), request.getEmail());
 
-        UUID token = UUID.randomUUID();
+        String token = tokenService.generateToken();
+        String tokenHash = tokenService.hash(token);
 
-        verificationTokenService.create(request.getUsername(), request.getEmail(), request.getPassword(), token);
+        verificationTokenService.create(request.getUsername(), request.getEmail(), request.getPassword(), tokenHash);
 
         mailService.sendMail(
                 request.getEmail(),
                 "Activate your account",
-                "Welcome " + request.getUsername() + "!\n\nActivate your account by clicking the following link:\nhttp://localhost:8080/activation-account?token=" + token
+                "Welcome " + request.getUsername() + "!\n\nActivate your account by clicking the following link:\n" + activateAccountBaseUrl + "?token=" + token
         );
     }
 
-    public void verify(UUID token) {
-        var verificationToken = verificationTokenService.validate(token);
+    public void verify(String token) {
+        var verificationToken = verificationTokenService.validate(tokenService.hash(token));
 
         validateUserNotExists(verificationToken.getUsername(), verificationToken.getEmail());
 
@@ -71,19 +80,21 @@ public class UserService {
         userRepository.findByEmail(email)
                 .orElseThrow(() -> new EmailNotFoundException("Email not found"));
 
-        UUID token = UUID.randomUUID();
+        String token = tokenService.generateToken();
+        String tokenHash = tokenService.hash(token);
 
-        passwordResetTokenService.create(email, token);
+
+        passwordResetTokenService.create(email, tokenHash);
 
         mailService.sendMail(
                 email,
                 "Password recovery",
-                "To reset your password, click the link below:\nhttp://localhost:8080/reset-password?token=" + token
+                "To reset your password, click the link below:\n" + resetPasswordBaseUrl + "?token=" + token
         );
     }
 
-    public void resetPassword(UUID token, String newPassword) {
-        var passwordResetToken = passwordResetTokenService.validate(token);
+    public void resetPassword(String token, String newPassword) {
+        var passwordResetToken = passwordResetTokenService.validate(tokenService.hash(token));
 
         User user = userRepository.findByEmail(passwordResetToken.getEmail())
                 .orElseThrow(() -> new EmailNotFoundException("Email not found"));
