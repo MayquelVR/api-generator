@@ -1,14 +1,14 @@
 package com.viewdatatools.apigenarator.api.adapter.in.web.mapper;
 
-import com.viewdatatools.apigenarator.api.domain.model.Api;
+import com.viewdatatools.apigenarator.api.domain.model.ApiDomain;
 import com.viewdatatools.apigenarator.api.dto.ApiCreateRequest;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ApiDtoMapper {
 
-    public Api toDomain(ApiCreateRequest req, String username) {
-        return Api.builder()
+    public ApiDomain toDomain(ApiCreateRequest req, String username) {
+        return ApiDomain.builder()
                 .name(req.getName())
                 .description(req.getDescription())
                 .version(req.getVersion())

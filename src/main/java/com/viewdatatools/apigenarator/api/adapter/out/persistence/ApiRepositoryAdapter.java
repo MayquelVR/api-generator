@@ -1,10 +1,10 @@
 package com.viewdatatools.apigenarator.api.adapter.out.persistence;
 
-import com.viewdatatools.apigenarator.api.domain.model.Api;
+import com.viewdatatools.apigenarator.api.domain.model.ApiDomain;
 import com.viewdatatools.apigenarator.api.domain.port.out.ApiRepositoryPort;
 import com.viewdatatools.apigenarator.api.adapter.out.persistence.entity.ApiJpaEntity;
-import com.viewdatatools.apigenarator.auth.model.User;
-import com.viewdatatools.apigenarator.auth.repository.UserRepository;
+import com.viewdatatools.apigenarator.auth.adapter.out.persistence.entity.UserJpaEntity;
+import com.viewdatatools.apigenarator.auth.adapter.out.persistence.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -17,23 +17,23 @@ import java.util.stream.Collectors;
 public class ApiRepositoryAdapter implements ApiRepositoryPort {
 
     private final ApiRepository apiRepository;
-    private final UserRepository userRepository;
+    private final UserJpaRepository userRepository;
 
     @Override
-    public void save(Api api) {
-        User user = userRepository.findByUsername(api.getUsername())
+    public void save(ApiDomain apiDomain) {
+        UserJpaEntity user = userRepository.findByUsername(apiDomain.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         ApiJpaEntity jpaEntity = ApiJpaEntity.builder()
-                .id(api.getId())
-                .name(api.getName())
-                .description(api.getDescription())
-                .version(api.getVersion())
-                .baseUrl(api.getBaseUrl())
-                .method(api.getMethod())
-                .requestFormat(api.getRequestFormat())
-                .responseFormat(api.getResponseFormat())
-                .route(api.getRoute())
+                .id(apiDomain.getId())
+                .name(apiDomain.getName())
+                .description(apiDomain.getDescription())
+                .version(apiDomain.getVersion())
+                .baseUrl(apiDomain.getBaseUrl())
+                .method(apiDomain.getMethod())
+                .requestFormat(apiDomain.getRequestFormat())
+                .responseFormat(apiDomain.getResponseFormat())
+                .route(apiDomain.getRoute())
                 .user(user)
                 .build();
 
@@ -41,21 +41,21 @@ public class ApiRepositoryAdapter implements ApiRepositoryPort {
     }
 
     @Override
-    public Optional<Api> findByUsernameAndRoute(String username, String route) {
+    public Optional<ApiDomain> findByUsernameAndRoute(String username, String route) {
         return apiRepository.findByUserUsernameAndRoute(username, route)
                 .map(this::toDomainEntity);
     }
 
     @Override
-    public List<Api> findAllByUserUsername(String username) {
+    public List<ApiDomain> findAllByUserUsername(String username) {
         return apiRepository.findAllByUserUsername(username)
                 .stream()
                 .map(this::toDomainEntity)
                 .collect(Collectors.toList());
     }
 
-    private Api toDomainEntity(ApiJpaEntity jpaEntity) {
-        return Api.builder()
+    private ApiDomain toDomainEntity(ApiJpaEntity jpaEntity) {
+        return ApiDomain.builder()
                 .id(jpaEntity.getId())
                 .name(jpaEntity.getName())
                 .description(jpaEntity.getDescription())

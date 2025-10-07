@@ -15,7 +15,7 @@ La **Arquitectura Hexagonal** (también conocida como **Ports and Adapters**) es
 ## 🏗️ Estructura del Proyecto
 
 ```
-api/
+apiDomain/
 ├── domain/                          # ❤️ NÚCLEO - Lógica de negocio pura
 │   ├── model/
 │   │   └── ApiEntity.java          # Entidad de dominio (sin anotaciones JPA)
@@ -62,7 +62,7 @@ api/
 
 ## 🔄 Flujo de Datos
 
-### Crear una API (POST /api):
+### Crear una API (POST /apiDomain):
 
 ```
 1. [Cliente HTTP] 
@@ -180,8 +180,8 @@ public class ApiService {
     
     public void createApi(ApiCreateReq req, String username) {
         User user = userRepository.findByUsername(username)...  // ❌ JPA leak
-        API api = API.builder()...  // ❌ Usa entidad JPA directamente
-        apiRepository.save(api);
+        API apiDomain = API.builder()...  // ❌ Usa entidad JPA directamente
+        apiRepository.save(apiDomain);
     }
 }
 ```
@@ -247,17 +247,17 @@ void testCreateApi() {
     when(mockUserRepo.existsByUsername("john")).thenReturn(true);
     
     // Ejecutar caso de uso
-    ApiEntity api = ApiEntity.builder()
+    ApiEntity apiDomain = ApiEntity.builder()
         .name("Test API")
         .route("test")
         .method("GET")
         .username("john")
         .build();
         
-    service.createApi(api);
+    service.createApi(apiDomain);
     
     // Verificar
-    verify(mockApiRepo).save(api);
+    verify(mockApiRepo).save(apiDomain);
 }
 ```
 
@@ -283,7 +283,7 @@ El uso desde el cliente NO cambia:
 
 ```bash
 # Crear API
-POST /api
+POST /apiDomain
 Authorization: Bearer <JWT_TOKEN>
 {
   "name": "Users API",
@@ -293,7 +293,7 @@ Authorization: Bearer <JWT_TOKEN>
 }
 
 # Invocar API
-GET /api/john/users
+GET /apiDomain/john/users
 ```
 
 ---
@@ -323,8 +323,8 @@ GET /api/john/users
 9. ✅ Manejador global de excepciones actualizado
 
 ### Código viejo (mantener por compatibilidad):
-- `api/service/ApiService.java` → Puede eliminarse
-- `api/controller/ApiController.java` → Reemplazado por `ApiRestController.java`
+- `apiDomain/service/ApiService.java` → Puede eliminarse
+- `apiDomain/controller/ApiController.java` → Reemplazado por `ApiRestController.java`
 
 ---
 

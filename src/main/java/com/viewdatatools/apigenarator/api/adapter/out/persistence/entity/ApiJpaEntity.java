@@ -1,6 +1,6 @@
 package com.viewdatatools.apigenarator.api.adapter.out.persistence.entity;
 
-import com.viewdatatools.apigenarator.auth.model.User;
+import com.viewdatatools.apigenarator.auth.adapter.out.persistence.entity.UserJpaEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,6 +31,6 @@ public class ApiJpaEntity {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private UserJpaEntity user;
 }
 
