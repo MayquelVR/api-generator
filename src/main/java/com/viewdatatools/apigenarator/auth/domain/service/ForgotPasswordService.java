@@ -1,7 +1,7 @@
 package com.viewdatatools.apigenarator.auth.domain.service;
 
-import com.viewdatatools.apigenarator.auth.domain.model.PasswordResetRequest;
-import com.viewdatatools.apigenarator.auth.domain.port.in.RequestPasswordResetUseCase;
+import com.viewdatatools.apigenarator.auth.domain.model.ForgotPassword;
+import com.viewdatatools.apigenarator.auth.domain.port.in.ForgotPasswordUseCase;
 import com.viewdatatools.apigenarator.auth.domain.port.out.MailServicePort;
 import com.viewdatatools.apigenarator.auth.domain.port.out.PasswordResetTokenPort;
 import com.viewdatatools.apigenarator.auth.domain.port.out.TokenServicePort;
@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RequestPasswordResetService implements RequestPasswordResetUseCase {
+public class ForgotPasswordService implements ForgotPasswordUseCase {
 
     private final UserRepositoryPort userRepositoryPort;
     private final TokenServicePort tokenServicePort;
@@ -24,10 +24,10 @@ public class RequestPasswordResetService implements RequestPasswordResetUseCase 
     @Value("${app.reset-password-url:/reset-password}")
     private String resetPasswordPath;
 
-    public RequestPasswordResetService(UserRepositoryPort userRepositoryPort,
-                                       TokenServicePort tokenServicePort,
-                                       PasswordResetTokenPort passwordResetTokenPort,
-                                       MailServicePort mailServicePort) {
+    public ForgotPasswordService(UserRepositoryPort userRepositoryPort,
+                                 TokenServicePort tokenServicePort,
+                                 PasswordResetTokenPort passwordResetTokenPort,
+                                 MailServicePort mailServicePort) {
         this.userRepositoryPort = userRepositoryPort;
         this.tokenServicePort = tokenServicePort;
         this.passwordResetTokenPort = passwordResetTokenPort;
@@ -35,8 +35,8 @@ public class RequestPasswordResetService implements RequestPasswordResetUseCase 
     }
 
     @Override
-    public void requestPasswordReset(PasswordResetRequest passwordResetRequest) {
-        String email = passwordResetRequest.getEmail();
+    public void forgotPassword(ForgotPassword forgotPassword) {
+        String email = forgotPassword.getEmail();
 
         userRepositoryPort.findByEmail(email)
                 .orElseThrow(() -> new EmailNotFoundException("Email not found"));

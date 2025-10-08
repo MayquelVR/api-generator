@@ -18,7 +18,7 @@ public class AuthRestController {
     private final RegisterUserUseCase registerUserUseCase;
     private final VerifyUserUseCase verifyUserUseCase;
     private final LoginUserUseCase loginUserUseCase;
-    private final RequestPasswordResetUseCase requestPasswordResetUseCase;
+    private final ForgotPasswordUseCase forgotPasswordUseCase;
     private final ResetPasswordUseCase resetPasswordUseCase;
     private final AuthDtoMapper authDtoMapper;
 
@@ -46,14 +46,14 @@ public class AuthRestController {
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
-        requestPasswordResetUseCase.requestPasswordReset(
-                authDtoMapper.toPasswordResetRequest(request)
+        forgotPasswordUseCase.forgotPassword(
+                authDtoMapper.toForgotPassword(request)
         );
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody PasswordResetRequest request) {
         resetPasswordUseCase.resetPassword(authDtoMapper.toPasswordReset(request));
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }

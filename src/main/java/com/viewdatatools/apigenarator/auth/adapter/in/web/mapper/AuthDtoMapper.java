@@ -36,13 +36,13 @@ public class AuthDtoMapper {
                 .build();
     }
 
-    public PasswordResetRequest toPasswordResetRequest(ForgotPasswordRequest request) {
-        return PasswordResetRequest.builder()
+    public ForgotPassword toForgotPassword(ForgotPasswordRequest request) {
+        return ForgotPassword.builder()
                 .email(request.getEmail())
                 .build();
     }
 
-    public PasswordReset toPasswordReset(ResetPasswordRequest request) {
+    public PasswordReset toPasswordReset(PasswordResetRequest request) {
         return PasswordReset.builder()
                 .token(request.getToken())
                 .newPassword(request.getPassword())
