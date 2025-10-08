@@ -1,339 +1,297 @@
-# Arquitectura Hexagonal - API Generator
+# Hexagonal Architecture - API Generator
 
-## 📐 ¿Qué es Arquitectura Hexagonal?
+## 📐 What is Hexagonal Architecture?
 
-La **Arquitectura Hexagonal** (también conocida como **Ports and Adapters**) es un patrón arquitectónico que separa la lógica de negocio del código de infraestructura.
+**Hexagonal Architecture** (also known as **Ports and Adapters**) is an architectural pattern that separates business logic from infrastructure code.
 
-### Beneficios:
-- ✅ **Independencia de frameworks**: El dominio no depende de Spring, JPA, etc.
-- ✅ **Testeable**: Puedes probar la lógica de negocio sin base de datos ni HTTP
-- ✅ **Flexible**: Puedes cambiar adaptadores sin tocar el dominio
-- ✅ **Mantenible**: Separación clara de responsabilidades
+### Benefits:
+- ✅ **Framework Independence**: Domain doesn't depend on Spring, JPA, etc.
+- ✅ **Testable**: Test business logic without database or HTTP
+- ✅ **Flexible**: Change adapters without touching the domain
+- ✅ **Maintainable**: Clear separation of concerns
 
 ---
 
-## 🏗️ Estructura del Proyecto
+## 🏗️ Project Structure
 
 ```
-apiDomain/
-├── domain/                          # ❤️ NÚCLEO - Lógica de negocio pura
-│   ├── model/
-│   │   └── ApiEntity.java          # Entidad de dominio (sin anotaciones JPA)
-│   ├── port/
-│   │   ├── in/                     # Puertos de entrada (Casos de uso)
-│   │   │   ├── CreateApiUseCase.java
-│   │   │   └── InvokeApiUseCase.java
-│   │   └── out/                    # Puertos de salida (Interfaces)
-│   │       ├── ApiRepositoryPort.java
-│   │       └── UserRepositoryPort.java
-│   ├── service/
-│   │   └── ApiDomainService.java   # Implementa los casos de uso
-│   └── exception/                   # Excepciones del dominio
-│       ├── ApiNotFoundException.java
-│       ├── UserNotFoundException.java
-│       ├── InvalidHttpMethodException.java
-│       └── InvalidRequestFormatException.java
+com.viewdatatools.apigenarator/
+├── ApigenaratorApplication.java     # 🚀 Spring Boot Main Application
 │
-├── adapter/                         # 🔌 ADAPTADORES
-│   ├── in/                         # Adaptadores de entrada
-│   │   └── web/
-│   │       ├── ApiRestController.java  # Controlador REST
-│   │       └── mapper/
-│   │           └── ApiDtoMapper.java   # Convierte DTOs a dominio
-│   └── out/                        # Adaptadores de salida
-│       └── persistence/
-│           ├── ApiRepositoryAdapter.java   # Implementa ApiRepositoryPort
-│           └── UserRepositoryAdapter.java  # Implementa UserRepositoryPort
+├── api/                             # 📡 API MODULE - Dynamic API Management
+│   ├── domain/                      # ❤️ CORE - Pure Business Logic
+│   │   ├── model/                   # Domain entities (no JPA annotations)
+│   │   ├── port/
+│   │   │   ├── in/                  # Input ports (Use Cases)
+│   │   │   └── out/                 # Output ports (Interfaces)
+│   │   ├── service/                 # Use case implementations
+│   │   └── exception/               # Domain exceptions
+│   │
+│   ├── adapter/                     # 🔌 ADAPTERS
+│   │   ├── in/                      # Input adapters
+│   │   │   └── web/                 # REST Controllers
+│   │   │       └── mapper/          # DTO to Domain mappers
+│   │   └── out/                     # Output adapters
+│   │       └── persistence/         # JPA Repositories & Entities
+│   │           └── entity/          # JPA entities
+│   │
+│   └── dto/                         # DTOs (Request/Response)
 │
-├── config/
-│   └── ApiHexagonalConfig.java     # Configuración de Spring
+├── auth/                            # 🔐 AUTH MODULE - Authentication & Authorization
+│   ├── domain/                      # ❤️ CORE - Pure Business Logic
+│   │   ├── model/                   # Domain entities (no JPA annotations)
+│   │   ├── port/
+│   │   │   ├── in/                  # Input ports (Use Cases)
+│   │   │   └── out/                 # Output ports (Interfaces)
+│   │   ├── service/                 # Use case implementations
+│   │   └── exception/               # Domain exceptions
+│   │
+│   ├── adapter/                     # 🔌 ADAPTERS
+│   │   ├── in/                      # Input adapters
+│   │   │   └── web/                 # REST Controllers
+│   │   └── out/                     # Output adapters
+│   │       ├── persistence/         # JPA Repositories & Entities
+│   │       │   └── entity/          # JPA entities
+│   │       └── mail/                # Email service adapter
+│   │
+│   └── dto/                         # DTOs (Request/Response)
 │
-├── dto/                            # DTOs (Request/Response)
-│   └── ApiCreateReq.java
+├── config/                          # ⚙️ GLOBAL CONFIGURATION
+│   └── SecurityConfig.java          # Spring Security configuration
 │
-├── model/                          # Entidades JPA (infraestructura)
-│   └── API.java
+├── security/                        # 🔒 SECURITY UTILITIES
+│   ├── JwtAuthenticationFilter.java # JWT authentication filter
+│   └── JwtUtil.java                 # JWT utilities
 │
-└── repository/                     # Repositorios JPA (infraestructura)
-    └── ApiRepository.java
+└── exception/                       # 🚨 GLOBAL EXCEPTION HANDLING
+    └── GlobalExceptionHandler.java  # HTTP exception handler
 ```
 
 ---
 
-## 🔄 Flujo de Datos
+## 🔄 Data Flow Example
 
-### Crear una API (POST /apiDomain):
-
-```
-1. [Cliente HTTP] 
-   ↓ (envía ApiCreateReq)
-2. [ApiRestController] (Adaptador de entrada)
-   ↓ (usa ApiDtoMapper para convertir a ApiEntity)
-3. [CreateApiUseCase] (Puerto de entrada)
-   ↓ (implementado por)
-4. [ApiDomainService] (Lógica de negocio)
-   ↓ (valida y usa)
-5. [ApiRepositoryPort] (Puerto de salida - interfaz)
-   ↓ (implementado por)
-6. [ApiRepositoryAdapter] (Adaptador de salida)
-   ↓ (convierte ApiEntity a API JPA y usa)
-7. [ApiRepository] (Spring Data JPA)
-   ↓
-8. [Base de Datos PostgreSQL]
-```
-
-### Invocar una API (GET /{username}/{route}):
+### Creating an API (POST /api/apis):
 
 ```
-1. [Cliente HTTP]
+[HTTP Client] 
+   ↓ (sends ApiCreateRequest + JWT Token)
+[JwtAuthenticationFilter] (Validates JWT)
    ↓
-2. [ApiRestController]
+[ApiRestController] (Input adapter)
+   ↓ (uses mapper to convert to ApiDomain)
+[CreateApiUseCase] (Input port)
+   ↓ (implemented by)
+[CreateApiService] (Business logic)
+   ↓ (validates user via UserRepositoryPort)
+   ↓ (validates data and uses ApiRepositoryPort)
+[ApiRepositoryAdapter] (Output adapter)
+   ↓ (converts ApiDomain to JPA Entity)
+[ApiRepository] (Spring Data JPA)
    ↓
-3. [InvokeApiUseCase]
-   ↓
-4. [ApiDomainService]
-   ├── Busca API en ApiRepositoryPort
-   ├── Valida método HTTP
-   ├── Valida formato de request
-   └── Devuelve responseFormat
-   ↓
-5. [Cliente recibe respuesta JSON]
+[PostgreSQL Database]
 ```
 
 ---
 
-## 🎯 Capas y Responsabilidades
+## 🎯 Layers & Responsibilities
 
-### 1️⃣ **DOMINIO (Core Business Logic)**
+### 1️⃣ **DOMAIN (Core Business Logic)**
 
-#### `ApiEntity` (modelo de dominio)
-- Entidad pura sin anotaciones de infraestructura
-- Representa una API en términos de negocio
+**Location**: `{module}/domain/`
 
-#### `CreateApiUseCase` y `InvokeApiUseCase` (puertos de entrada)
-- Definen QUÉ puede hacer el sistema
-- Son interfaces que exponen la funcionalidad
+- **Models**: Pure domain entities without infrastructure annotations
+- **Input Ports**: Interfaces defining what the system can do (Use Cases)
+- **Output Ports**: Interfaces defining what the domain needs from outside
+- **Services**: Implement use cases and contain business logic
+- **Exceptions**: Domain-specific exceptions
 
-#### `ApiRepositoryPort` y `UserRepositoryPort` (puertos de salida)
-- Definen QUÉ necesita el dominio del exterior
-- Son interfaces que el dominio NO implementa
-
-#### `ApiDomainService`
-- ❤️ **CORAZÓN DE LA APLICACIÓN**
-- Contiene toda la lógica de negocio
-- Implementa los casos de uso (puertos de entrada)
-- Usa los puertos de salida (sin saber cómo funcionan)
-- Validaciones:
-  - Usuario existe
-  - Datos de API válidos
-  - Método HTTP correcto
-  - Formato de request válido
+**Key Principle**: Zero external dependencies (only Java + Lombok)
 
 ---
 
-### 2️⃣ **ADAPTADORES DE ENTRADA (Drivers)**
+### 2️⃣ **INPUT ADAPTERS (Drivers)**
 
-#### `ApiRestController`
-- Recibe peticiones HTTP
-- Convierte DTOs a entidades de dominio
-- Delega a los casos de uso
-- Maneja respuestas HTTP
+**Location**: `{module}/adapter/in/`
 
-#### `ApiDtoMapper`
-- Convierte ApiCreateReq (DTO) a ApiEntity (dominio)
-- Separa el contrato HTTP del modelo de dominio
+- **REST Controllers**: Expose HTTP endpoints
+- **Mappers**: Convert DTOs to domain models
+- **DTOs**: Request/Response data transfer objects
+
+**Responsibility**: Receive external requests and delegate to domain
 
 ---
 
-### 3️⃣ **ADAPTADORES DE SALIDA (Driven)**
+### 3️⃣ **OUTPUT ADAPTERS (Driven)**
 
-#### `ApiRepositoryAdapter`
-- Implementa `ApiRepositoryPort`
-- Convierte entre ApiEntity (dominio) y API (JPA)
-- Usa ApiRepository (Spring Data JPA)
-- **Traduce** entre el mundo del dominio y el mundo de la persistencia
+**Location**: `{module}/adapter/out/`
 
-#### `UserRepositoryAdapter`
-- Implementa `UserRepositoryPort`
-- Verifica si usuarios existen
-- Usa UserRepository (Spring Data JPA)
+- **Persistence Adapters**: Implement repository ports using JPA
+- **External Service Adapters**: Implement ports for email, APIs, etc.
+- **JPA Entities**: Database entities with annotations
+- **JPA Repositories**: Spring Data repositories
+
+**Responsibility**: Implement domain ports using infrastructure
 
 ---
 
-### 4️⃣ **CONFIGURACIÓN**
+### 4️⃣ **GLOBAL CONFIGURATION**
 
-#### `ApiHexagonalConfig`
-- **Conecta todo** usando Dependency Injection
-- Crea el bean de ApiDomainService
-- Expone los casos de uso como beans
+**Location**: `config/`, `security/`, `exception/`
+
+- **SecurityConfig**: Spring Security setup (CORS, JWT, authentication)
+- **JwtAuthenticationFilter**: JWT validation for all requests
+- **GlobalExceptionHandler**: Convert domain exceptions to HTTP responses
+
+**Responsibility**: Wire all components together
 
 ---
 
-## 🔧 Diferencias con el Código Anterior
+## 🔧 Traditional vs Hexagonal Architecture
 
-### ❌ Antes (Arquitectura tradicional en capas):
+### ❌ Traditional Layered Architecture:
 ```java
 @Service
 public class ApiService {
-    private final ApiRepository apiRepository;  // ❌ Depende de JPA
-    private final UserRepository userRepository; // ❌ Depende de infraestructura
+    private final ApiRepository apiRepository;  // ❌ Direct JPA dependency
     
-    public void createApi(ApiCreateReq req, String username) {
-        User user = userRepository.findByUsername(username)...  // ❌ JPA leak
-        API apiDomain = API.builder()...  // ❌ Usa entidad JPA directamente
-        apiRepository.save(apiDomain);
+    public void createApi(ApiCreateRequest req) {
+        API api = API.builder()...  // ❌ Uses JPA entity directly
+        apiRepository.save(api);
     }
 }
 ```
 
-**Problemas:**
-- El servicio depende directamente de JPA
-- No puedes testear sin base de datos
-- Difícil cambiar la persistencia
+**Problems**: Domain depends on infrastructure, hard to test, difficult to change
 
 ---
 
-### ✅ Ahora (Arquitectura Hexagonal):
+### ✅ Hexagonal Architecture:
 
 ```java
-// DOMINIO (sin dependencias externas)
-public class ApiDomainService implements CreateApiUseCase, InvokeApiUseCase {
-    private final ApiRepositoryPort apiRepositoryPort;  // ✅ Interfaz del dominio
-    private final UserRepositoryPort userRepositoryPort; // ✅ Interfaz del dominio
+// DOMAIN (no external dependencies)
+public class CreateApiService implements CreateApiUseCase {
+    private final ApiRepositoryPort apiRepositoryPort;  // ✅ Domain interface
     
-    public void createApi(ApiEntity apiEntity) {  // ✅ Usa entidad de dominio
-        if (!userRepositoryPort.existsByUsername(apiEntity.getUsername())) {
-            throw new UserNotFoundException(...);
-        }
-        validateApiData(apiEntity);  // ✅ Lógica de negocio pura
-        apiRepositoryPort.save(apiEntity);  // ✅ Usa puerto (interfaz)
+    @Override
+    public ApiDomain createApi(ApiDomain apiDomain) {  // ✅ Domain entity
+        validateApiData(apiDomain);  // ✅ Pure business logic
+        return apiRepositoryPort.save(apiDomain);
     }
 }
 
-// ADAPTADOR (implementa el puerto)
+// ADAPTER (implements the port)
 @Component
 public class ApiRepositoryAdapter implements ApiRepositoryPort {
     private final ApiRepository apiRepository;  // Spring Data JPA
     
-    public void save(ApiEntity apiEntity) {
-        API jpaEntity = convertToJpaEntity(apiEntity);  // ✅ Conversión
-        apiRepository.save(jpaEntity);
+    @Override
+    public ApiDomain save(ApiDomain apiDomain) {
+        Api jpaEntity = convertToJpaEntity(apiDomain);
+        Api saved = apiRepository.save(jpaEntity);
+        return convertToDomain(saved);
     }
 }
 ```
 
-**Ventajas:**
-- ✅ El dominio no sabe nada de JPA
-- ✅ Puedes testear con implementaciones mock
-- ✅ Puedes cambiar de PostgreSQL a MongoDB sin tocar el dominio
+**Benefits**: Domain is pure, easy to test, easy to change infrastructure
 
 ---
 
-## 🧪 Testing
+## 📦 Layer Dependencies
 
-### Test unitario del dominio (sin Spring, sin BD):
-
-```java
-@Test
-void testCreateApi() {
-    // Mocks de los puertos
-    ApiRepositoryPort mockApiRepo = mock(ApiRepositoryPort.class);
-    UserRepositoryPort mockUserRepo = mock(UserRepositoryPort.class);
-    
-    // Servicio de dominio (lógica pura)
-    ApiDomainService service = new ApiDomainService(mockApiRepo, mockUserRepo);
-    
-    // Simular que el usuario existe
-    when(mockUserRepo.existsByUsername("john")).thenReturn(true);
-    
-    // Ejecutar caso de uso
-    ApiEntity apiDomain = ApiEntity.builder()
-        .name("Test API")
-        .route("test")
-        .method("GET")
-        .username("john")
-        .build();
-        
-    service.createApi(apiDomain);
-    
-    // Verificar
-    verify(mockApiRepo).save(apiDomain);
-}
+```
+Domain → NOTHING (0 external dependencies)
+  ↑
+  |
+Adapters → Infrastructure (Spring, JPA, Security, etc.)
+  ↑
+  |
+Configuration → Everything (wires components together)
 ```
 
 ---
 
-## 📦 Dependencias
+## 🚀 API Endpoints
 
-### Dominio → **NADA** (0 dependencias)
-- No depende de Spring
-- No depende de JPA
-- No depende de HTTP
-- **Java puro**
+### API Module
 
-### Adaptadores → Infraestructura
-- Dependen de Spring, JPA, etc.
-- Implementan los puertos del dominio
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/apis` | Create new API | JWT |
+| GET | `/api/apis` | List user's APIs | JWT |
+| GET | `/api/apis/{username}/{route}` | Invoke specific API | No |
 
----
+### Auth Module
 
-## 🚀 Cómo Usar
-
-El uso desde el cliente NO cambia:
-
-```bash
-# Crear API
-POST /apiDomain
-Authorization: Bearer <JWT_TOKEN>
-{
-  "name": "Users API",
-  "route": "users",
-  "method": "GET",
-  "responseFormat": "{\"users\": []}"
-}
-
-# Invocar API
-GET /apiDomain/john/users
-```
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/auth/register` | Register new user | No |
+| POST | `/api/auth/login` | Login | No |
+| POST | `/api/auth/verify` | Verify account | No |
+| POST | `/api/auth/forgot-password` | Request password reset | No |
+| POST | `/api/auth/reset-password` | Reset password | No |
 
 ---
 
-## 🎓 Principios Aplicados
+## 🔐 Security
 
-1. **Dependency Inversion**: El dominio define interfaces, la infraestructura las implementa
-2. **Single Responsibility**: Cada clase tiene una única razón para cambiar
-3. **Open/Closed**: Puedes agregar nuevos adaptadores sin cambiar el dominio
-4. **Interface Segregation**: Puertos pequeños y específicos
-5. **Separation of Concerns**: Dominio, aplicación e infraestructura separados
+### JWT Authentication
+1. User registers and verifies email
+2. User logs in with credentials
+3. System generates JWT token
+4. Client sends JWT in `Authorization: Bearer {token}` header
+5. `JwtAuthenticationFilter` validates token on each request
+6. If valid, grants access to resource
 
----
+### CORS Configuration
+- Allowed origins: Configurable via `application.properties`
+- Allowed headers: `Authorization`, `Content-Type`, `Accept`
+- Allowed methods: `GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`
 
-## 🔄 Migración desde el Código Anterior
-
-### Pasos realizados:
-
-1. ✅ Creada capa de dominio con entidades puras
-2. ✅ Definidos puertos de entrada (casos de uso)
-3. ✅ Definidos puertos de salida (interfaces de repositorio)
-4. ✅ Implementado servicio de dominio con lógica de negocio
-5. ✅ Creados adaptadores de persistencia
-6. ✅ Creado adaptador web (controlador)
-7. ✅ Configuración de Spring para conectar todo
-8. ✅ Excepciones del dominio
-9. ✅ Manejador global de excepciones actualizado
-
-### Código viejo (mantener por compatibilidad):
-- `apiDomain/service/ApiService.java` → Puede eliminarse
-- `apiDomain/controller/ApiController.java` → Reemplazado por `ApiRestController.java`
+### Password Encryption
+- BCrypt with cost factor 10
+- Passwords never stored in plain text
 
 ---
 
-## 📚 Más Información
+## 🎓 SOLID Principles Applied
+
+1. **Single Responsibility Principle (SRP)**: Each class has one reason to change
+2. **Open/Closed Principle (OCP)**: Add new adapters without changing domain
+3. **Liskov Substitution Principle (LSP)**: Adapters can be substituted
+4. **Interface Segregation Principle (ISP)**: Small, specific ports
+5. **Dependency Inversion Principle (DIP)**: Domain defines interfaces, infrastructure implements them
+
+---
+
+## 🔄 Key Advantages
+
+- ✅ **Testability**: Test business logic without infrastructure
+- ✅ **Maintainability**: Clear code organization
+- ✅ **Flexibility**: Easy to change databases, external services
+- ✅ **Scalability**: Modular structure, can split into microservices
+
+---
+
+## 📚 Additional Resources
 
 - [Hexagonal Architecture by Alistair Cockburn](https://alistair.cockburn.us/hexagonal-architecture/)
 - [Clean Architecture by Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- [Domain-Driven Design by Eric Evans](https://www.domainlanguage.com/ddd/)
 
 ---
 
-¡Tu aplicación ahora sigue Arquitectura Hexagonal! 🎉
+## 🎉 Summary
 
+This **API Generator** application follows **complete Hexagonal Architecture**:
+- ✅ Pure domain with zero external dependencies
+- ✅ Clear ports (input and output)
+- ✅ Input adapters (REST controllers)
+- ✅ Output adapters (persistence, email, security)
+- ✅ Total separation between business logic and infrastructure
+- ✅ Robust JWT authentication system
+- ✅ User management with email verification
+- ✅ Dynamic user-configurable APIs
+
+**The project is well-structured and follows software architecture best practices!** 🚀

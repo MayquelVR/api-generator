@@ -1,5 +1,6 @@
 package com.viewdatatools.apigenarator.auth.domain.service;
 
+import com.viewdatatools.apigenarator.auth.domain.model.PasswordResetRequest;
 import com.viewdatatools.apigenarator.auth.domain.port.in.RequestPasswordResetUseCase;
 import com.viewdatatools.apigenarator.auth.domain.port.out.MailServicePort;
 import com.viewdatatools.apigenarator.auth.domain.port.out.PasswordResetTokenPort;
@@ -17,8 +18,11 @@ public class RequestPasswordResetService implements RequestPasswordResetUseCase 
     private final PasswordResetTokenPort passwordResetTokenPort;
     private final MailServicePort mailServicePort;
 
-    @Value("${app.reset-password-url:http://localhost:4200/reset-password}")
-    private String resetPasswordBaseUrl;
+    @Value("${app.ui-url:http://localhost:4200}")
+    private String uiBaseUrl;
+
+    @Value("${app.reset-password-url:/reset-password}")
+    private String resetPasswordPath;
 
     public RequestPasswordResetService(UserRepositoryPort userRepositoryPort,
                                        TokenServicePort tokenServicePort,
@@ -31,7 +35,9 @@ public class RequestPasswordResetService implements RequestPasswordResetUseCase 
     }
 
     @Override
-    public void createPasswordResetToken(String email) {
+    public void requestPasswordReset(PasswordResetRequest passwordResetRequest) {
+        String email = passwordResetRequest.getEmail();
+
         userRepositoryPort.findByEmail(email)
                 .orElseThrow(() -> new EmailNotFoundException("Email not found"));
 
@@ -44,7 +50,7 @@ public class RequestPasswordResetService implements RequestPasswordResetUseCase 
                 email,
                 "Reset your password",
                 "Reset your password by clicking the following link:\n"
-                + resetPasswordBaseUrl + "?token=" + token
+                + uiBaseUrl + resetPasswordPath + "?token=" + token
         );
     }
 }

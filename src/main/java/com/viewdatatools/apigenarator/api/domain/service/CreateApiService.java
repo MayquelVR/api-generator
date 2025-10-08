@@ -1,6 +1,5 @@
 package com.viewdatatools.apigenarator.api.domain.service;
 
-
 import com.viewdatatools.apigenarator.api.domain.exception.UserNotFoundException;
 import com.viewdatatools.apigenarator.api.domain.model.ApiDomain;
 import com.viewdatatools.apigenarator.api.domain.port.in.CreateApiUseCase;

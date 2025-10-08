@@ -1,6 +1,7 @@
 package com.viewdatatools.apigenarator.auth.domain.port.in;
 
-public interface RequestPasswordResetUseCase {
-    void createPasswordResetToken(String email);
-}
+import com.viewdatatools.apigenarator.auth.domain.model.PasswordResetRequest;
 
+public interface RequestPasswordResetUseCase {
+    void requestPasswordReset(PasswordResetRequest passwordResetRequest);
+}

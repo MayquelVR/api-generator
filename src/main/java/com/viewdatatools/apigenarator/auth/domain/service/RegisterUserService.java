@@ -1,8 +1,8 @@
 package com.viewdatatools.apigenarator.auth.domain.service;
 
+import com.viewdatatools.apigenarator.auth.domain.model.UserRegistration;
 import com.viewdatatools.apigenarator.auth.domain.port.in.RegisterUserUseCase;
 import com.viewdatatools.apigenarator.auth.domain.port.out.*;
-import com.viewdatatools.apigenarator.auth.dto.RegisterRequest;
 import com.viewdatatools.apigenarator.auth.domain.exception.EmailAlreadyExistsException;
 import com.viewdatatools.apigenarator.auth.domain.exception.UsernameAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,8 +17,11 @@ public class RegisterUserService implements RegisterUserUseCase {
     private final MailServicePort mailServicePort;
     private final PasswordEncoderPort passwordEncoderPort;
 
-    @Value("${app.base-url:http://localhost:4200/activate-account}")
-    private String activateAccountBaseUrl;
+    @Value("${app.ui-url:http://localhost:4200}")
+    private String uiBaseUrl;
+
+    @Value("${app.activate-account-url:/activate-account}")
+    private String activateAccountPath;
 
     public RegisterUserService(UserRepositoryPort userRepositoryPort,
                                TokenServicePort tokenServicePort,
@@ -33,26 +36,26 @@ public class RegisterUserService implements RegisterUserUseCase {
     }
 
     @Override
-    public void register(RegisterRequest request) {
-        if (userRepositoryPort.existsByUsername(request.getUsername())) {
+    public void register(UserRegistration userRegistration) {
+        if (userRepositoryPort.existsByUsername(userRegistration.getUsername())) {
             throw new UsernameAlreadyExistsException("Username already exists");
         }
-        if (userRepositoryPort.existsByEmail(request.getEmail())) {
+        if (userRepositoryPort.existsByEmail(userRegistration.getEmail())) {
             throw new EmailAlreadyExistsException("Email already exists");
         }
 
-        String encodedPassword = passwordEncoderPort.encode(request.getPassword());
+        String encodedPassword = passwordEncoderPort.encode(userRegistration.getPassword());
 
         String token = tokenServicePort.generateToken();
         String tokenHash = tokenServicePort.hash(token);
 
-        verificationTokenPort.create(request.getUsername(), request.getEmail(), encodedPassword, tokenHash);
+        verificationTokenPort.create(userRegistration.getUsername(), userRegistration.getEmail(), encodedPassword, tokenHash);
 
         mailServicePort.sendMail(
-                request.getEmail(),
+                userRegistration.getEmail(),
                 "Activate your account",
-                "Welcome " + request.getUsername() + "!\n\nActivate your account by clicking the following link:\n"
-                + activateAccountBaseUrl + "?token=" + token
+                "Welcome " + userRegistration.getUsername() + "!\n\nActivate your account by clicking the following link:\n"
+                + uiBaseUrl + activateAccountPath + "?token=" + token
         );
     }
 }
