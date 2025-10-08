@@ -17,7 +17,7 @@ public class RegisterUserService implements RegisterUserUseCase {
     private final MailServicePort mailServicePort;
     private final PasswordEncoderPort passwordEncoderPort;
 
-    @Value("${app.ui-url:http://localhost:4200}")
+    @Value("${app.ui-base-url:http://localhost:4200}")
     private String uiBaseUrl;
 
     @Value("${app.activate-account-url:/activate-account}")

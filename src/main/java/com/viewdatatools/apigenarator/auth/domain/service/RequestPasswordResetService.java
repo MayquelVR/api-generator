@@ -18,7 +18,7 @@ public class RequestPasswordResetService implements RequestPasswordResetUseCase 
     private final PasswordResetTokenPort passwordResetTokenPort;
     private final MailServicePort mailServicePort;
 
-    @Value("${app.ui-url:http://localhost:4200}")
+    @Value("${app.ui-base-url:http://localhost:4200}")
     private String uiBaseUrl;
 
     @Value("${app.reset-password-url:/reset-password}")
