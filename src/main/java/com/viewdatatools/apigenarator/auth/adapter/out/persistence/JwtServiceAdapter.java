@@ -21,4 +21,13 @@ public class JwtServiceAdapter implements JwtServicePort {
 
         return jwtUtil.generateToken(username, email);
     }
+
+    @Override
+    public String generateRefreshToken(String username) {
+        String email = userRepositoryPort.findByUsername(username)
+                .map(user -> user.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return jwtUtil.generateRefreshToken(username, email);
+    }
 }

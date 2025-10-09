@@ -33,6 +33,8 @@ public class AuthDtoMapper {
                 .username(authenticatedUser.getUsername())
                 .email(authenticatedUser.getEmail())
                 .token(authenticatedUser.getToken())
+                .refreshToken(authenticatedUser.getRefreshToken())
+                .expiresIn(authenticatedUser.getExpiresIn())
                 .build();
     }
 
@@ -49,4 +51,3 @@ public class AuthDtoMapper {
                 .build();
     }
 }
-
