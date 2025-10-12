@@ -1,5 +1,6 @@
 package com.viewdatatools.apigenarator.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,8 +49,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
                 }
+            } catch (ExpiredJwtException e) {
+                // Token expirado - enviar respuesta clara al frontend
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\":\"Token expired\",\"message\":\"Your session has expired. Please log in again.\",\"timestamp\":\"" + java.time.LocalDateTime.now() + "\"}");
+                return;
             } catch (Exception e) {
-                System.out.println("Invalid token: " + e.getMessage());
+                // Token inválido o malformado
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\":\"Invalid token\",\"message\":\"" + e.getMessage() + "\",\"timestamp\":\"" + java.time.LocalDateTime.now() + "\"}");
+                return;
             }
         }
 
