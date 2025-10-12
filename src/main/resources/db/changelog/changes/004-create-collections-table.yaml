@@ -1,0 +1,58 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-create-collections-table
+      author: api-generator
+      changes:
+        - createTable:
+            tableName: collections
+            columns:
+              - column:
+                  name: uuid
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: collection_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_uuid
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: schema
+                  type: jsonb
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: collections
+            columnNames: user_uuid, collection_name
+            constraintName: uk_collections_user_uuid_collection_name
+        - createIndex:
+            indexName: idx_collections_user_uuid
+            tableName: collections
+            columns:
+              - column:
+                  name: user_uuid
+        - createIndex:
+            indexName: idx_collections_user_uuid_collection_name
+            tableName: collections
+            columns:
+              - column:
+                  name: user_uuid
+              - column:
+                  name: collection_name
+

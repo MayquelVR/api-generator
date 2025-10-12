@@ -1,0 +1,53 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-create-verification-token-table
+      author: api-generator
+      changes:
+        - createTable:
+            tableName: verification_token
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_uuid
+                  type: uuid
+                  constraints:
+                    nullable: true
+              - column:
+                  name: username
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: token_hash
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: expiry_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_verification_token_hash
+            tableName: verification_token
+            columns:
+              - column:
+                  name: token_hash
+
