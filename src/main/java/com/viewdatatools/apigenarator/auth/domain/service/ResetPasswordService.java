@@ -1,5 +1,6 @@
 package com.viewdatatools.apigenarator.auth.domain.service;
 
+import com.viewdatatools.apigenarator.auth.domain.model.PasswordReset;
 import com.viewdatatools.apigenarator.auth.domain.model.UserDomain;
 import com.viewdatatools.apigenarator.auth.domain.port.in.ResetPasswordUseCase;
 import com.viewdatatools.apigenarator.auth.domain.port.out.PasswordEncoderPort;
@@ -30,14 +31,14 @@ public class ResetPasswordService implements ResetPasswordUseCase {
     }
 
     @Override
-    public void resetPassword(String token, String newPassword) {
-        String tokenHash = tokenServicePort.hash(token);
+    public void resetPassword(PasswordReset passwordReset) {
+        String tokenHash = tokenServicePort.hash(passwordReset.getToken());
         String email = passwordResetTokenPort.validateAndGetEmail(tokenHash);
 
         UserDomain user = userRepositoryPort.findByEmail(email)
                 .orElseThrow(() -> new EmailNotFoundException("Email not found"));
 
-        String encodedPassword = passwordEncoderPort.encode(newPassword);
+        String encodedPassword = passwordEncoderPort.encode(passwordReset.getNewPassword());
 
         user.setPassword(encodedPassword);
         user.setUpdatedAt(LocalDateTime.now());

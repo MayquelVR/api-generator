@@ -5,8 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class RegisterRequest {
+
+    private UUID uuid; // Campo opcional - si viene del frontend se usa, sino se genera automáticamente
 
     @NotBlank(message = "The username is required")
     private String username;
@@ -19,4 +23,3 @@ public class RegisterRequest {
     @Size(min = 6, message = "The password must be at least 6 characters long")
     private String password;
 }
-

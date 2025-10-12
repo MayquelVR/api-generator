@@ -9,4 +9,3 @@ public interface PasswordResetTokenJpaRepository extends JpaRepository<PasswordR
     Optional<PasswordResetTokenJpaEntity> findByTokenHash(String tokenHash);
     void deleteByTokenHash(String tokenHash);
 }
-

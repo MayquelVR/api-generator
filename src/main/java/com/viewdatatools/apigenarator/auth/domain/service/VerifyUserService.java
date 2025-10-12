@@ -1,12 +1,14 @@
 package com.viewdatatools.apigenarator.auth.domain.service;
 
 import com.viewdatatools.apigenarator.auth.domain.model.UserDomain;
+import com.viewdatatools.apigenarator.auth.domain.model.VerificationToken;
 import com.viewdatatools.apigenarator.auth.domain.port.in.VerifyUserUseCase;
 import com.viewdatatools.apigenarator.auth.domain.port.out.TokenServicePort;
 import com.viewdatatools.apigenarator.auth.domain.port.out.UserRepositoryPort;
 import com.viewdatatools.apigenarator.auth.domain.port.out.VerificationTokenPort;
 import com.viewdatatools.apigenarator.auth.domain.exception.EmailAlreadyExistsException;
 import com.viewdatatools.apigenarator.auth.domain.exception.UsernameAlreadyExistsException;
+import com.viewdatatools.apigenarator.util.UuidUtil;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,8 +29,8 @@ public class VerifyUserService implements VerifyUserUseCase {
     }
 
     @Override
-    public void verify(String token) {
-        String tokenHash = tokenServicePort.hash(token);
+    public void verify(VerificationToken verificationToken) {
+        String tokenHash = tokenServicePort.hash(verificationToken.getToken());
         VerificationTokenPort.VerificationTokenData tokenData = verificationTokenPort.validate(tokenHash);
 
         if (userRepositoryPort.existsByUsername(tokenData.getUsername())) {
@@ -39,6 +41,7 @@ public class VerifyUserService implements VerifyUserUseCase {
         }
 
         UserDomain user = UserDomain.builder()
+                .uuid(UuidUtil.validateOrGenerateUuidV7(tokenData.getUuid()))
                 .username(tokenData.getUsername())
                 .email(tokenData.getEmail())
                 .password(tokenData.getPassword())

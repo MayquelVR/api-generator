@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -17,8 +18,9 @@ public class VerificationTokenAdapter implements VerificationTokenPort {
     private final VerificationTokenJpaRepository repository;
 
     @Override
-    public void create(String username, String email, String password, String tokenHash) {
+    public void create(UUID userUuid, String username, String email, String password, String tokenHash) {
         VerificationTokenJpaEntity entity = VerificationTokenJpaEntity.builder()
+                .userUuid(userUuid)
                 .username(username)
                 .email(email)
                 .password(password)
@@ -38,6 +40,7 @@ public class VerificationTokenAdapter implements VerificationTokenPort {
         }
 
         return new VerificationTokenData(
+                entity.getUserUuid(),
                 entity.getUsername(),
                 entity.getEmail(),
                 entity.getPassword()

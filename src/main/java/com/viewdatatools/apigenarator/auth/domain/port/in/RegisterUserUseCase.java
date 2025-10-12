@@ -1,7 +1,7 @@
 package com.viewdatatools.apigenarator.auth.domain.port.in;
 
-import com.viewdatatools.apigenarator.auth.dto.RegisterRequest;
+import com.viewdatatools.apigenarator.auth.domain.model.UserRegistration;
 
 public interface RegisterUserUseCase {
-    void register(RegisterRequest request);
+    void register(UserRegistration userRegistration);
 }

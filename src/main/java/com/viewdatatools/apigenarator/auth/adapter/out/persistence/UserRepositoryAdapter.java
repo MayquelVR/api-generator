@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -16,9 +17,14 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
 
     @Override
     public void save(UserDomain user) {
+        // Generar UUID si no existe
+        if (user.getUuid() == null) {
+            user.setUuid(UUID.randomUUID());
+        }
+
         UserJpaEntity jpaEntity = toJpaEntity(user);
         UserJpaEntity savedEntity = userJpaRepository.save(jpaEntity);
-        user.setId(savedEntity.getId());
+        user.setUuid(savedEntity.getUuid());
     }
 
     @Override
@@ -45,7 +51,7 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
 
     private UserJpaEntity toJpaEntity(UserDomain domain) {
         return UserJpaEntity.builder()
-                .id(domain.getId())
+                .uuid(domain.getUuid())
                 .username(domain.getUsername())
                 .email(domain.getEmail())
                 .password(domain.getPassword())
@@ -56,7 +62,7 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
 
     private UserDomain toDomain(UserJpaEntity jpaEntity) {
         return UserDomain.builder()
-                .id(jpaEntity.getId())
+                .uuid(jpaEntity.getUuid())
                 .username(jpaEntity.getUsername())
                 .email(jpaEntity.getEmail())
                 .password(jpaEntity.getPassword())

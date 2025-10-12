@@ -1,9 +1,9 @@
 package com.viewdatatools.apigenarator.auth.adapter.out.persistence;
 
 import com.viewdatatools.apigenarator.auth.domain.port.out.PasswordEncoderPort;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor

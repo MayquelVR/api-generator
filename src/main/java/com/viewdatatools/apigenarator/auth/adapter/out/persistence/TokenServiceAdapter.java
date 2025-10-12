@@ -5,26 +5,37 @@ import org.springframework.stereotype.Component;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.UUID;
 
 @Component
 public class TokenServiceAdapter implements TokenServicePort {
 
-    @Override
+    private static final SecureRandom secureRandom = new SecureRandom();
+
     public String generateToken() {
-        return UUID.randomUUID().toString();
+        byte[] bytes = new byte[32];
+        secureRandom.nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
-    @Override
     public String hash(String token) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(token.getBytes());
-            return Base64.getEncoder().encodeToString(hash);
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(token.getBytes());
+            return bytesToHex(digest);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error hashing token", e);
+            throw new IllegalStateException("SHA-256 not available", e);
         }
+    }
+
+    private String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
     }
 }
 
