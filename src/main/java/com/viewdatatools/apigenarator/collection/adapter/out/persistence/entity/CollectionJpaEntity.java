@@ -1,6 +1,5 @@
 package com.viewdatatools.apigenarator.collection.adapter.out.persistence.entity;
 
-import com.viewdatatools.apigenarator.auth.adapter.out.persistence.entity.UserJpaEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,10 +10,11 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.UUID;
 
 @Entity
-@Table(name = "user_collections", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "collection_name"})
+@Table(name = "collections", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_uuid", "collection_name"})
 })
 @Data
 @NoArgsConstructor
@@ -23,15 +23,14 @@ import java.util.Map;
 public class CollectionJpaEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "uuid", nullable = false, unique = true)
+    private UUID uuid;
 
     @Column(name = "collection_name", nullable = false)
     private String collectionName;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserJpaEntity user;
+    @Column(name = "user_uuid", nullable = false)
+    private UUID userUuid;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "schema", columnDefinition = "jsonb", nullable = false)
@@ -43,4 +42,3 @@ public class CollectionJpaEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 }
-

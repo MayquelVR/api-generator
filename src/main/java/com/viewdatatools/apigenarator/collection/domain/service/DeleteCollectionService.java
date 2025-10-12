@@ -24,10 +24,9 @@ public class DeleteCollectionService implements DeleteCollectionUseCase {
                 ));
 
         // Delete all documents in the collection
-        documentRepositoryPort.deleteAllByCollectionId(collection.getId());
+        documentRepositoryPort.deleteAllByCollectionUuid(collection.getUuid());
 
         // Delete the collection itself
-        collectionRepositoryPort.delete(collection.getId());
+        collectionRepositoryPort.delete(collection.getUuid());
     }
 }
-

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ public class UpdateDocumentService implements UpdateDocumentUseCase {
     private final SchemaValidatorService schemaValidatorService;
 
     @Override
-    public DocumentDomain updateDocument(String username, String collectionName, Long documentId, DocumentDomain updatedDocument) {
+    public DocumentDomain updateDocument(String username, String collectionName, UUID documentUuid, DocumentDomain updatedDocument) {
         // Find collection
         CollectionDomain collection = collectionRepositoryPort
                 .findByUsernameAndCollectionName(username, collectionName)
@@ -30,13 +31,13 @@ public class UpdateDocumentService implements UpdateDocumentUseCase {
                 ));
 
         // Get existing document
-        DocumentDomain existingDocument = documentRepositoryPort.findById(documentId)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found with id: " + documentId));
+        DocumentDomain existingDocument = documentRepositoryPort.findById(documentUuid)
+                .orElseThrow(() -> new DocumentNotFoundException("Document not found with uuid: " + documentUuid));
 
         // Verify document belongs to the collection
-        if (!existingDocument.getCollectionId().equals(collection.getId())) {
+        if (!existingDocument.getCollectionUuid().equals(collection.getUuid())) {
             throw new DocumentNotFoundException(
-                    "Document " + documentId + " does not belong to collection '" + collectionName + "'"
+                    "Document " + documentUuid + " does not belong to collection '" + collectionName + "'"
             );
         }
 
@@ -50,4 +51,3 @@ public class UpdateDocumentService implements UpdateDocumentUseCase {
         return documentRepositoryPort.save(existingDocument);
     }
 }
-

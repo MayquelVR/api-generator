@@ -28,4 +28,3 @@ public class PasswordResetTokenJpaEntity {
     @Column(name = "expiry_at", nullable = false)
     private LocalDateTime expiresAt;
 }
-

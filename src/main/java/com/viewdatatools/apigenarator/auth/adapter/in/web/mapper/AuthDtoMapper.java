@@ -2,6 +2,7 @@ package com.viewdatatools.apigenarator.auth.adapter.in.web.mapper;
 
 import com.viewdatatools.apigenarator.auth.domain.model.*;
 import com.viewdatatools.apigenarator.auth.dto.*;
+import com.viewdatatools.apigenarator.util.UuidUtil;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -9,6 +10,7 @@ public class AuthDtoMapper {
 
     public UserRegistration toUserRegistration(RegisterRequest request) {
         return UserRegistration.builder()
+                .uuid(UuidUtil.validateOrGenerateUuidV7(request.getUuid()))
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(request.getPassword())

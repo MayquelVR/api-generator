@@ -8,6 +8,7 @@ import com.viewdatatools.apigenarator.auth.domain.port.out.UserRepositoryPort;
 import com.viewdatatools.apigenarator.auth.domain.port.out.VerificationTokenPort;
 import com.viewdatatools.apigenarator.auth.domain.exception.EmailAlreadyExistsException;
 import com.viewdatatools.apigenarator.auth.domain.exception.UsernameAlreadyExistsException;
+import com.viewdatatools.apigenarator.util.UuidUtil;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -40,6 +41,7 @@ public class VerifyUserService implements VerifyUserUseCase {
         }
 
         UserDomain user = UserDomain.builder()
+                .uuid(UuidUtil.validateOrGenerateUuidV7(tokenData.getUuid()))
                 .username(tokenData.getUsername())
                 .email(tokenData.getEmail())
                 .password(tokenData.getPassword())

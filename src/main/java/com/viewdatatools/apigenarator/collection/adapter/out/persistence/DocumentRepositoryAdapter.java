@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -19,9 +20,13 @@ public class DocumentRepositoryAdapter implements DocumentRepositoryPort {
 
     @Override
     public DocumentDomain save(DocumentDomain document) {
+        if (document.getUuid() == null) {
+            document.setUuid(UUID.randomUUID());
+        }
+
         DocumentJpaEntity entity = DocumentJpaEntity.builder()
-                .id(document.getId())
-                .collectionId(document.getCollectionId())
+                .uuid(document.getUuid())
+                .collectionUuid(document.getCollectionUuid())
                 .documentData(document.getData())
                 .createdAt(document.getCreatedAt())
                 .updatedAt(document.getUpdatedAt())
@@ -32,38 +37,38 @@ public class DocumentRepositoryAdapter implements DocumentRepositoryPort {
     }
 
     @Override
-    public Optional<DocumentDomain> findById(Long documentId) {
-        return documentRepository.findById(documentId)
+    public Optional<DocumentDomain> findById(UUID documentUuid) {
+        return documentRepository.findById(documentUuid)
                 .map(this::toDomain);
     }
 
     @Override
-    public List<DocumentDomain> findAllByCollectionId(Long collectionId) {
-        return documentRepository.findAllByCollectionId(collectionId).stream()
+    public List<DocumentDomain> findAllByCollectionUuid(UUID collectionUuid) {
+        return documentRepository.findAllByCollectionUuid(collectionUuid).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public void deleteById(Long documentId) {
-        documentRepository.deleteById(documentId);
+    public void deleteById(UUID documentUuid) {
+        documentRepository.deleteById(documentUuid);
     }
 
     @Override
     @Transactional
-    public void deleteAllByCollectionId(Long collectionId) {
-        documentRepository.deleteAllByCollectionId(collectionId);
+    public void deleteAllByCollectionUuid(UUID collectionUuid) {
+        documentRepository.deleteAllByCollectionUuid(collectionUuid);
     }
 
     @Override
-    public long countByCollectionId(Long collectionId) {
-        return documentRepository.countByCollectionId(collectionId);
+    public long countByCollectionUuid(UUID collectionUuid) {
+        return documentRepository.countByCollectionUuid(collectionUuid);
     }
 
     private DocumentDomain toDomain(DocumentJpaEntity entity) {
         return DocumentDomain.builder()
-                .id(entity.getId())
-                .collectionId(entity.getCollectionId())
+                .uuid(entity.getUuid())
+                .collectionUuid(entity.getCollectionUuid())
                 .data(entity.getDocumentData())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())

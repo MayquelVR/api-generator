@@ -49,7 +49,13 @@ public class RegisterUserService implements RegisterUserUseCase {
         String token = tokenServicePort.generateToken();
         String tokenHash = tokenServicePort.hash(token);
 
-        verificationTokenPort.create(userRegistration.getUsername(), userRegistration.getEmail(), encodedPassword, tokenHash);
+        verificationTokenPort.create(
+                userRegistration.getUuid(),
+                userRegistration.getUsername(),
+                userRegistration.getEmail(),
+                encodedPassword,
+                tokenHash
+        );
 
         mailServicePort.sendMail(
                 userRegistration.getEmail(),

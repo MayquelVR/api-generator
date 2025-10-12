@@ -26,7 +26,6 @@ public class GetDocumentsService implements GetDocumentsUseCase {
                         "Collection '" + collectionName + "' not found for user '" + username + "'"
                 ));
 
-        return documentRepositoryPort.findAllByCollectionId(collection.getId());
+        return documentRepositoryPort.findAllByCollectionUuid(collection.getUuid());
     }
 }
-

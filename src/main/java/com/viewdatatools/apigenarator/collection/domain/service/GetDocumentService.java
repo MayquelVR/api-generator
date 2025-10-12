@@ -10,6 +10,8 @@ import com.viewdatatools.apigenarator.collection.domain.port.out.DocumentReposit
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class GetDocumentService implements GetDocumentUseCase {
@@ -18,7 +20,7 @@ public class GetDocumentService implements GetDocumentUseCase {
     private final DocumentRepositoryPort documentRepositoryPort;
 
     @Override
-    public DocumentDomain getDocument(String username, String collectionName, Long documentId) {
+    public DocumentDomain getDocument(String username, String collectionName, UUID documentUuid) {
         // Verify collection exists and belongs to user
         CollectionDomain collection = collectionRepositoryPort
                 .findByUsernameAndCollectionName(username, collectionName)
@@ -27,17 +29,16 @@ public class GetDocumentService implements GetDocumentUseCase {
                 ));
 
         // Get document
-        DocumentDomain document = documentRepositoryPort.findById(documentId)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found with id: " + documentId));
+        DocumentDomain document = documentRepositoryPort.findById(documentUuid)
+                .orElseThrow(() -> new DocumentNotFoundException("Document not found with uuid: " + documentUuid));
 
         // Verify document belongs to the collection
-        if (!document.getCollectionId().equals(collection.getId())) {
+        if (!document.getCollectionUuid().equals(collection.getUuid())) {
             throw new DocumentNotFoundException(
-                    "Document " + documentId + " does not belong to collection '" + collectionName + "'"
+                    "Document " + documentUuid + " does not belong to collection '" + collectionName + "'"
             );
         }
 
         return document;
     }
 }
-

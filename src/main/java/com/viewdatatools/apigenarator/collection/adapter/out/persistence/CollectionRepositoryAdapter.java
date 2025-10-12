@@ -3,7 +3,6 @@ package com.viewdatatools.apigenarator.collection.adapter.out.persistence;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viewdatatools.apigenarator.auth.adapter.out.persistence.UserJpaRepository;
-import com.viewdatatools.apigenarator.auth.adapter.out.persistence.entity.UserJpaEntity;
 import com.viewdatatools.apigenarator.collection.adapter.out.persistence.entity.CollectionJpaEntity;
 import com.viewdatatools.apigenarator.collection.domain.model.CollectionDomain;
 import com.viewdatatools.apigenarator.collection.domain.model.FieldDefinition;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -21,69 +21,75 @@ import java.util.stream.Collectors;
 public class CollectionRepositoryAdapter implements CollectionRepositoryPort {
 
     private final CollectionRepository collectionRepository;
-    private final UserJpaRepository userRepository;
+    private final UserJpaRepository userJpaRepository;
     private final ObjectMapper objectMapper;
 
     @Override
     public CollectionDomain save(CollectionDomain collection) {
-        UserJpaEntity user = userRepository.findByUsername(collection.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found: " + collection.getUsername()));
-
         Map<String, Object> schemaMap = objectMapper.convertValue(
                 collection.getSchema(),
                 new TypeReference<Map<String, Object>>() {}
         );
 
         CollectionJpaEntity entity = CollectionJpaEntity.builder()
-                .id(collection.getId())
+                .uuid(collection.getUuid())
                 .collectionName(collection.getCollectionName())
-                .user(user)
+                .userUuid(collection.getUserUuid())
                 .schema(schemaMap)
                 .createdAt(collection.getCreatedAt())
                 .updatedAt(collection.getUpdatedAt())
                 .build();
 
         CollectionJpaEntity saved = collectionRepository.save(entity);
-        return toDomain(saved);
+        return toDomain(saved, collection.getUsername());
     }
 
     @Override
     public Optional<CollectionDomain> findByUsernameAndCollectionName(String username, String collectionName) {
-        return collectionRepository.findByUserUsernameAndCollectionName(username, collectionName)
-                .map(this::toDomain);
+        UUID userUuid = getUserUuidFromUsername(username);
+        return collectionRepository.findByUserUuidAndCollectionName(userUuid, collectionName)
+                .map(entity -> toDomain(entity, username));
     }
 
     @Override
     public List<CollectionDomain> findAllByUsername(String username) {
-        return collectionRepository.findAllByUserUsername(username).stream()
-                .map(this::toDomain)
+        UUID userUuid = getUserUuidFromUsername(username);
+        return collectionRepository.findAllByUserUuid(userUuid).stream()
+                .map(entity -> toDomain(entity, username))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public void delete(Long collectionId) {
-        collectionRepository.deleteById(collectionId);
+    public void delete(UUID collectionUuid) {
+        collectionRepository.deleteById(collectionUuid);
     }
 
     @Override
     public boolean existsByUsernameAndCollectionName(String username, String collectionName) {
-        return collectionRepository.existsByUserUsernameAndCollectionName(username, collectionName);
+        UUID userUuid = getUserUuidFromUsername(username);
+        return collectionRepository.existsByUserUuidAndCollectionName(userUuid, collectionName);
     }
 
-    private CollectionDomain toDomain(CollectionJpaEntity entity) {
+    private UUID getUserUuidFromUsername(String username) {
+        return userJpaRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username))
+                .getUuid();
+    }
+
+    private CollectionDomain toDomain(CollectionJpaEntity entity, String username) {
         Map<String, FieldDefinition> schema = objectMapper.convertValue(
                 entity.getSchema(),
                 new TypeReference<Map<String, FieldDefinition>>() {}
         );
 
         return CollectionDomain.builder()
-                .id(entity.getId())
+                .uuid(entity.getUuid())
                 .collectionName(entity.getCollectionName())
-                .username(entity.getUser().getUsername())
+                .userUuid(entity.getUserUuid())
+                .username(username)
                 .schema(schema)
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 }
-

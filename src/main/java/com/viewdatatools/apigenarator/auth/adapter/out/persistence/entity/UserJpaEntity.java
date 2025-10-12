@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -14,8 +15,8 @@ import java.time.LocalDateTime;
 public class UserJpaEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "uuid", nullable = false, unique = true)
+    private UUID uuid;
 
     @Column(nullable = false, unique = true, length = 50)
     private String username;
@@ -32,4 +33,3 @@ public class UserJpaEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 }
-

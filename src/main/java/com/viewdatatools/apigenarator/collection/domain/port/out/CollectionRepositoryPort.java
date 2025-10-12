@@ -4,12 +4,12 @@ import com.viewdatatools.apigenarator.collection.domain.model.CollectionDomain;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface CollectionRepositoryPort {
     CollectionDomain save(CollectionDomain collection);
     Optional<CollectionDomain> findByUsernameAndCollectionName(String username, String collectionName);
     List<CollectionDomain> findAllByUsername(String username);
-    void delete(Long collectionId);
+    void delete(UUID collectionUuid);
     boolean existsByUsernameAndCollectionName(String username, String collectionName);
 }
-

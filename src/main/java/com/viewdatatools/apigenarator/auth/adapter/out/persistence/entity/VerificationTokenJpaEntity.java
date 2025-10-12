@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "verification_token")
@@ -18,6 +19,9 @@ public class VerificationTokenJpaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "user_uuid", nullable = true)
+    private UUID userUuid; // UUID del usuario que viene del frontend (puede ser null)
 
     @Column(nullable = false, length = 50)
     private String username;
@@ -34,4 +38,3 @@ public class VerificationTokenJpaEntity {
     @Column(name = "expiry_at", nullable = false)
     private LocalDateTime expiresAt;
 }
-

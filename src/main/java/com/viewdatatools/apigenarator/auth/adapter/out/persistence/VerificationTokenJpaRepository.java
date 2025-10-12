@@ -9,4 +9,3 @@ public interface VerificationTokenJpaRepository extends JpaRepository<Verificati
     Optional<VerificationTokenJpaEntity> findByTokenHash(String tokenHash);
     void deleteByTokenHash(String tokenHash);
 }
-

@@ -5,10 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface CollectionRepository extends JpaRepository<CollectionJpaEntity, Long> {
-    Optional<CollectionJpaEntity> findByUserUsernameAndCollectionName(String username, String collectionName);
-    List<CollectionJpaEntity> findAllByUserUsername(String username);
-    boolean existsByUserUsernameAndCollectionName(String username, String collectionName);
+public interface CollectionRepository extends JpaRepository<CollectionJpaEntity, UUID> {
+    Optional<CollectionJpaEntity> findByUserUuidAndCollectionName(UUID userUuid, String collectionName);
+    List<CollectionJpaEntity> findAllByUserUuid(UUID userUuid);
+    boolean existsByUserUuidAndCollectionName(UUID userUuid, String collectionName);
 }
-

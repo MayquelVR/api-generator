@@ -10,21 +10,21 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.UUID;
 
 @Entity
-@Table(name = "collection_documents")
+@Table(name = "documents")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class DocumentJpaEntity {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "uuid", nullable = false, unique = true)
+    private UUID uuid;
 
-    @Column(name = "collection_id", nullable = false)
-    private Long collectionId;
+    @Column(name = "collection_uuid", nullable = false)
+    private UUID collectionUuid;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "document_data", columnDefinition = "jsonb", nullable = false)

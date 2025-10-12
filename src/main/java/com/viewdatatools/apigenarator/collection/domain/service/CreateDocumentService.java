@@ -31,8 +31,8 @@ public class CreateDocumentService implements CreateDocumentUseCase {
         // Validate document against schema
         schemaValidatorService.validateDocument(document.getData(), collection.getSchema());
 
-        // Set collection ID and timestamps
-        document.setCollectionId(collection.getId());
+        // Set collection UUID and timestamps
+        document.setCollectionUuid(collection.getUuid());
         LocalDateTime now = LocalDateTime.now();
         document.setCreatedAt(now);
         document.setUpdatedAt(now);
@@ -40,4 +40,3 @@ public class CreateDocumentService implements CreateDocumentUseCase {
         return documentRepositoryPort.save(document);
     }
 }
-

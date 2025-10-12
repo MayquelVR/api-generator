@@ -10,6 +10,8 @@ import com.viewdatatools.apigenarator.collection.domain.port.out.DocumentReposit
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class DeleteDocumentService implements DeleteDocumentUseCase {
@@ -18,7 +20,7 @@ public class DeleteDocumentService implements DeleteDocumentUseCase {
     private final DocumentRepositoryPort documentRepositoryPort;
 
     @Override
-    public void deleteDocument(String username, String collectionName, Long documentId) {
+    public void deleteDocument(String username, String collectionName, UUID documentUuid) {
         // Verify collection exists and belongs to user
         CollectionDomain collection = collectionRepositoryPort
                 .findByUsernameAndCollectionName(username, collectionName)
@@ -27,17 +29,17 @@ public class DeleteDocumentService implements DeleteDocumentUseCase {
                 ));
 
         // Get document to verify it exists
-        DocumentDomain document = documentRepositoryPort.findById(documentId)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found with id: " + documentId));
+        DocumentDomain document = documentRepositoryPort.findById(documentUuid)
+                .orElseThrow(() -> new DocumentNotFoundException("Document not found with uuid: " + documentUuid));
 
         // Verify document belongs to the collection
-        if (!document.getCollectionId().equals(collection.getId())) {
+        if (!document.getCollectionUuid().equals(collection.getUuid())) {
             throw new DocumentNotFoundException(
-                    "Document " + documentId + " does not belong to collection '" + collectionName + "'"
+                    "Document " + documentUuid + " does not belong to collection '" + collectionName + "'"
             );
         }
 
         // Delete document
-        documentRepositoryPort.deleteById(documentId);
+        documentRepositoryPort.deleteById(documentUuid);
     }
 }

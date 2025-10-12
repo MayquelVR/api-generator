@@ -7,11 +7,13 @@ import com.viewdatatools.apigenarator.collection.dto.CollectionResponse;
 import com.viewdatatools.apigenarator.collection.dto.CollectionWithSchemaResponse;
 import com.viewdatatools.apigenarator.collection.dto.CreateCollectionRequest;
 import com.viewdatatools.apigenarator.collection.dto.FieldDefinitionDto;
+import com.viewdatatools.apigenarator.util.UuidUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -19,19 +21,21 @@ public class CollectionDtoMapper {
 
     private final DocumentRepositoryPort documentRepositoryPort;
 
-    public CollectionDomain toDomain(CreateCollectionRequest request, String username) {
+    public CollectionDomain toDomain(CreateCollectionRequest request, UUID userUuid, String username) {
         return CollectionDomain.builder()
+                .uuid(UuidUtil.validateOrGenerateUuidV7(request.getUuid()))
                 .collectionName(request.getCollectionName())
+                .userUuid(userUuid)
                 .username(username)
                 .schema(convertSchemaToFieldDefinitions(request.getSchema()))
                 .build();
     }
 
     public CollectionResponse toResponse(CollectionDomain domain) {
-        long documentCount = documentRepositoryPort.countByCollectionId(domain.getId());
+        long documentCount = documentRepositoryPort.countByCollectionUuid(domain.getUuid());
 
         return CollectionResponse.builder()
-                .id(domain.getId())
+                .uuid(domain.getUuid())
                 .collectionName(domain.getCollectionName())
                 .username(domain.getUsername())
                 .documentCount(documentCount)
@@ -41,10 +45,10 @@ public class CollectionDtoMapper {
     }
 
     public CollectionWithSchemaResponse toResponseWithSchema(CollectionDomain domain) {
-        long documentCount = documentRepositoryPort.countByCollectionId(domain.getId());
+        long documentCount = documentRepositoryPort.countByCollectionUuid(domain.getUuid());
 
         return CollectionWithSchemaResponse.builder()
-                .id(domain.getId())
+                .uuid(domain.getUuid())
                 .collectionName(domain.getCollectionName())
                 .username(domain.getUsername())
                 .schema(convertFieldDefinitionsToDto(domain.getSchema()))

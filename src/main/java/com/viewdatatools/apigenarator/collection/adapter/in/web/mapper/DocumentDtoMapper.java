@@ -7,6 +7,7 @@ import com.viewdatatools.apigenarator.collection.dto.UpdateDocumentRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -24,8 +25,8 @@ public class DocumentDtoMapper {
         }
 
         return DocumentResponse.builder()
-                .id(domain.getId())
-                .collectionId(domain.getCollectionId())
+                .uuid(domain.getUuid())
+                .collectionUuid(domain.getCollectionUuid())
                 .data(domain.getData())
                 .createdAt(domain.getCreatedAt())
                 .updatedAt(domain.getUpdatedAt())
@@ -48,13 +49,13 @@ public class DocumentDtoMapper {
     /**
      * Convert CreateDocumentRequest DTO to DocumentDomain
      */
-    public DocumentDomain toDomain(CreateDocumentRequest request, Long collectionId) {
+    public DocumentDomain toDomain(CreateDocumentRequest request, UUID collectionUuid) {
         if (request == null) {
             return null;
         }
 
         return DocumentDomain.builder()
-                .collectionId(collectionId)
+                .collectionUuid(collectionUuid)
                 .data(request.getData())
                 .build();
     }
@@ -71,4 +72,3 @@ public class DocumentDtoMapper {
         return existing;
     }
 }
-

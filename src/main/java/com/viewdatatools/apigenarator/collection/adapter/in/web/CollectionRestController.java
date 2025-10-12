@@ -1,11 +1,13 @@
 package com.viewdatatools.apigenarator.collection.adapter.in.web;
 
+import com.viewdatatools.apigenarator.auth.domain.port.out.UserRepositoryPort;
 import com.viewdatatools.apigenarator.collection.adapter.in.web.mapper.CollectionDtoMapper;
 import com.viewdatatools.apigenarator.collection.adapter.in.web.mapper.DocumentDtoMapper;
 import com.viewdatatools.apigenarator.collection.domain.model.CollectionDomain;
 import com.viewdatatools.apigenarator.collection.domain.model.DocumentDomain;
 import com.viewdatatools.apigenarator.collection.domain.port.in.*;
 import com.viewdatatools.apigenarator.collection.dto.*;
+import com.viewdatatools.apigenarator.util.UuidUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -33,6 +36,7 @@ public class CollectionRestController {
     private final DeleteDocumentUseCase deleteDocumentUseCase;
     private final CollectionDtoMapper collectionDtoMapper;
     private final DocumentDtoMapper documentDtoMapper;
+    private final UserRepositoryPort userRepositoryPort;
 
     // ========== Collection Endpoints ==========
 
@@ -41,8 +45,12 @@ public class CollectionRestController {
             @Valid @RequestBody CreateCollectionRequest request,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
+        UUID userUuid = userRepositoryPort.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getUuid();
+
         CollectionDomain collection = createCollectionUseCase.createCollection(
-                collectionDtoMapper.toDomain(request, userDetails.getUsername())
+                collectionDtoMapper.toDomain(request, userUuid, userDetails.getUsername())
         );
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(collectionDtoMapper.toResponse(collection));
@@ -89,6 +97,7 @@ public class CollectionRestController {
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         DocumentDomain documentToCreate = DocumentDomain.builder()
+                .uuid(UuidUtil.validateOrGenerateUuidV7(request.getUuid()))
                 .data(request.getData())
                 .build();
 
@@ -116,24 +125,24 @@ public class CollectionRestController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{collectionName}/documents/{documentId}")
+    @GetMapping("/{collectionName}/documents/{documentUuid}")
     public ResponseEntity<DocumentResponse> getDocument(
             @PathVariable String collectionName,
-            @PathVariable Long documentId,
+            @PathVariable UUID documentUuid,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         DocumentDomain document = getDocumentUseCase.getDocument(
                 userDetails.getUsername(),
                 collectionName,
-                documentId
+                documentUuid
         );
         return ResponseEntity.ok(documentDtoMapper.toResponse(document));
     }
 
-    @PutMapping("/{collectionName}/documents/{documentId}")
+    @PutMapping("/{collectionName}/documents/{documentUuid}")
     public ResponseEntity<DocumentResponse> updateDocument(
             @PathVariable String collectionName,
-            @PathVariable Long documentId,
+            @PathVariable UUID documentUuid,
             @Valid @RequestBody UpdateDocumentRequest request,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
@@ -144,22 +153,22 @@ public class CollectionRestController {
         DocumentDomain document = updateDocumentUseCase.updateDocument(
                 userDetails.getUsername(),
                 collectionName,
-                documentId,
+                documentUuid,
                 documentToUpdate
         );
         return ResponseEntity.ok(documentDtoMapper.toResponse(document));
     }
 
-    @DeleteMapping("/{collectionName}/documents/{documentId}")
+    @DeleteMapping("/{collectionName}/documents/{documentUuid}")
     public ResponseEntity<Void> deleteDocument(
             @PathVariable String collectionName,
-            @PathVariable Long documentId,
+            @PathVariable UUID documentUuid,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         deleteDocumentUseCase.deleteDocument(
                 userDetails.getUsername(),
                 collectionName,
-                documentId
+                documentUuid
         );
         return ResponseEntity.noContent().build();
     }

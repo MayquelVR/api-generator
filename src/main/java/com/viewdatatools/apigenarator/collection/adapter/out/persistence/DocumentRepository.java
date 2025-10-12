@@ -4,9 +4,10 @@ import com.viewdatatools.apigenarator.collection.adapter.out.persistence.entity.
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface DocumentRepository extends JpaRepository<DocumentJpaEntity, Long> {
-    List<DocumentJpaEntity> findAllByCollectionId(Long collectionId);
-    void deleteAllByCollectionId(Long collectionId);
-    long countByCollectionId(Long collectionId);
+public interface DocumentRepository extends JpaRepository<DocumentJpaEntity, UUID> {
+    List<DocumentJpaEntity> findAllByCollectionUuid(UUID collectionUuid);
+    void deleteAllByCollectionUuid(UUID collectionUuid);
+    long countByCollectionUuid(UUID collectionUuid);
 }
