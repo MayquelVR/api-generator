@@ -21,7 +21,7 @@ public class ForgotPasswordService implements ForgotPasswordUseCase {
     @Value("${app.ui-base-url:http://localhost:4200}")
     private String uiBaseUrl;
 
-    @Value("${app.reset-password-url:/reset-password}")
+    @Value("${app.reset-password-path:/reset-password}")
     private String resetPasswordPath;
 
     public ForgotPasswordService(UserRepositoryPort userRepositoryPort,

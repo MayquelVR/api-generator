@@ -20,7 +20,7 @@ public class RegisterUserService implements RegisterUserUseCase {
     @Value("${app.ui-base-url:http://localhost:4200}")
     private String uiBaseUrl;
 
-    @Value("${app.activate-account-url:/activate-account}")
+    @Value("${app.activate-account-path:/activate-account}")
     private String activateAccountPath;
 
     public RegisterUserService(UserRepositoryPort userRepositoryPort,
