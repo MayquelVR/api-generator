@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changes/001-create-users-table.yaml
+  - include:
+      file: db/changelog/changes/002-create-verification-token-table.yaml
+  - include:
+      file: db/changelog/changes/003-create-password-reset-token-table.yaml
+  - include:
+      file: db/changelog/changes/004-create-collections-table.yaml
+  - include:
+      file: db/changelog/changes/005-create-documents-table.yaml

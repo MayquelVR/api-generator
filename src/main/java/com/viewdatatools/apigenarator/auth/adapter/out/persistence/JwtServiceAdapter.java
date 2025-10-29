@@ -31,4 +31,24 @@ public class JwtServiceAdapter implements JwtServicePort {
 
         return jwtUtil.generateRefreshToken(username, email);
     }
+
+    @Override
+    public boolean canTokenBeRefreshed(String token) {
+        return jwtUtil.canTokenBeRefreshed(token);
+    }
+
+    @Override
+    public boolean isTokenExpired(String token) {
+        return jwtUtil.isTokenExpired(token);
+    }
+
+    @Override
+    public String extractUsername(String token) {
+        return jwtUtil.extractUsername(token);
+    }
+
+    @Override
+    public String getEmailFromToken(String token) {
+        return jwtUtil.getEmailFromToken(token);
+    }
 }

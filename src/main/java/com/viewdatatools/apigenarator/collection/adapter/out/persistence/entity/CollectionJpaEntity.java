@@ -33,7 +33,7 @@ public class CollectionJpaEntity {
     private UUID userUuid;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "schema", columnDefinition = "jsonb", nullable = false)
+    @Column(name = "schema", nullable = false)
     private Map<String, Object> schema;
 
     @Column(name = "created_at", nullable = false)

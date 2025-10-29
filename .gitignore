@@ -31,3 +31,19 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### SEGURIDAD - NO SUBIR CREDENCIALES ###
+.env
+.env.local
+.env.production
+.env.*.local
+*.pem
+*.key
+*.p12
+*.jks
+secrets/
+credentials/
+
+### Logs que pueden contener información sensible ###
+*.log
+logs/

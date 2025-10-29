@@ -27,7 +27,7 @@ public class DocumentJpaEntity {
     private UUID collectionUuid;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "document_data", columnDefinition = "jsonb", nullable = false)
+    @Column(name = "document_data", nullable = false)
     private Map<String, Object> documentData;
 
     @Column(name = "created_at", nullable = false)
