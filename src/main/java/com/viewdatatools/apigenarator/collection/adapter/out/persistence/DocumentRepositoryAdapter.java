@@ -27,7 +27,7 @@ public class DocumentRepositoryAdapter implements DocumentRepositoryPort {
         DocumentJpaEntity entity = DocumentJpaEntity.builder()
                 .uuid(document.getUuid())
                 .collectionUuid(document.getCollectionUuid())
-                .documentData(document.getData())
+                .data(document.getData())
                 .createdAt(document.getCreatedAt())
                 .updatedAt(document.getUpdatedAt())
                 .build();
@@ -69,7 +69,7 @@ public class DocumentRepositoryAdapter implements DocumentRepositoryPort {
         return DocumentDomain.builder()
                 .uuid(entity.getUuid())
                 .collectionUuid(entity.getCollectionUuid())
-                .data(entity.getDocumentData())
+                .data(entity.getData())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
